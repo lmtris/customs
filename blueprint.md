@@ -55,6 +55,8 @@ Number -> [0-9]+
 ## Usage
 Only `concrete constraint` will be rendered in the generated code.
 
+File format `*.cus`
+
 ## Warning
 ### W001 `implicit request definition`
 This warning is shown when the constraint is not having any request definition. 
