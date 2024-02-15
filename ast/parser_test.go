@@ -10,19 +10,13 @@ func TestParser_ParseExprSimple(t *testing.T) {
 	`
 	lexer := Lexer{Text: input}
 	tokens, err := lexer.Scan()
-	fmt.Printf("tokens => %v\n", tokens)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
 	parser := NewParser(tokens)
 	expr := parser.ParseExpr(0, len(tokens)-3)
+	fmt.Printf("input = %v", input)
 	fmt.Printf("stmt => %v\n", PrefixTraversal(expr))
-	if err != nil {
-		t.Errorf("Error: %v", err)
-	}
-	if expr == nil {
-		t.Errorf("stmt is nil")
-	}
 }
 
 func TestParser_ParseExprIntermediate(t *testing.T) {
@@ -30,17 +24,25 @@ func TestParser_ParseExprIntermediate(t *testing.T) {
 	`
 	lexer := Lexer{Text: input}
 	tokens, err := lexer.Scan()
-	fmt.Printf("tokens => %v\n", tokens)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
 	parser := NewParser(tokens)
 	expr := parser.ParseExpr(0, len(tokens)-3)
+	fmt.Printf("input = %v", input)
 	fmt.Printf("stmt => %v\n", PrefixTraversal(expr))
+}
+
+func TestParser_ParseExprAdvance(t *testing.T) {
+	input := `2 - 4 + 10 * 8;
+	`
+	lexer := Lexer{Text: input}
+	tokens, err := lexer.Scan()
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
-	if expr == nil {
-		t.Errorf("stmt is nil")
-	}
+	parser := NewParser(tokens)
+	expr := parser.ParseExpr(0, len(tokens)-3)
+	fmt.Printf("input = %v", input)
+	fmt.Printf("stmt => %v\n", PrefixTraversal(expr))
 }

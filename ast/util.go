@@ -31,3 +31,7 @@ func Prev(r *Parser, pos int) Token {
 	}
 	return r.Token[pos-1]
 }
+
+func GetType(r *Parser, pos int) TokenType {
+	return r.Token[pos].TokenType
+}

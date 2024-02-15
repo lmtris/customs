@@ -8,10 +8,19 @@ The specs of `customs` language is defined in this [blueprint](blueprint.md)
 This is a compiler for `customs` language written in Golang. It compiles the `customs` language into a `YAML` schema.
 
 ## Checklist
+### Define Language Specs
 - [x] Define the language
+### Lexer
 - [x] Implement lexer
-- [ ] Implement parser
+### Parser
+- [x] Implement numeric expression parser
+- [ ] Support parenthesis
+- [ ] Support boolean expression
+- [ ] Support string expression
+- [ ] Implement statement parser
+### Static Analysis
 - [ ] Implement static checker
+### Code Generation
 - [ ] Implement ast to targeted `yaml` file
 
 ## About

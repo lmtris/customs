@@ -4,12 +4,10 @@ import "fmt"
 
 type Token struct {
 	TokenType
-	Literal     string
-	Lexeme      string
-	Line        int
-	Column      int
-	LeftWeight  int
-	RightWeight int
+	Literal string
+	Lexeme  string
+	Line    int
+	Column  int
 }
 
 func NewToken(typ TokenType, lit string, line, column int) Token {

@@ -1,5 +1,5 @@
-
-
+## Example
+### `example.cus`
 ```text
 abstract constraint Root {
     let threshold = 2 * (30 - 10 / 2);
@@ -13,6 +13,18 @@ abstract constraint Root {
 }
 
 constraint RegisterApi extends Root;
+```
+### `example.yaml`
+```yaml
+RegisterApi:
+  Token:
+    - Gt: 0
+    - Lt: 100
+  Usage:
+    - NotEmpty: true
+  ExtraInfo:
+    Name:
+      - NotEmpty: true
 ```
 ## Context Free Grammar
 ```ebnf
@@ -52,7 +64,7 @@ Identifier -> [a-zA-Z][a-zA-Z0-9]*
 Number -> [0-9]+
 
 ```
-## Usage
+## Notation
 Only `concrete constraint` will be rendered in the generated code.
 
 File format `*.cus`

@@ -64,42 +64,66 @@ func (r *Parser) MatchAndConsume(tokenType TokenType) (Token, bool) {
 	return Token{}, false
 }
 
-func (r *Parser) GetPrecedence() int {
-	switch r.This().TokenType {
-	case LeftParen, RightParen:
-		return 0
-	case Mul, Div:
-		return 1
-	case Plus, Minus:
-		return 2
-	default:
-		return -1
+// RemoveParenthesis removes all parenthesis from Parenthesis+ Token
+func RemoveParenthesis(tokens []Token) (num Token, ok bool) {
+	typs := []TokenType{LeftParen, RightParen, Number}
+
+	// Case check valid token types
+	for token := range tokens {
+		if !slices.Contains(typs, tokens[token].TokenType) {
+			return Token{}, false
+		}
 	}
+
+	// Check only one number
+	count := 0
+	for token := range tokens {
+		if tokens[token].TokenType == Number {
+			num = tokens[token]
+			count += 1
+		}
+	}
+
+	if count != 1 {
+		return Token{}, false
+	}
+
+	return num, true
 }
 
-func (r *Parser) ParseExpr(head, tail int) (expr Expr) {
+// ParseExpr parses an expression from a list of tokens
+//
+// head: the index of the first token
+//
+// tail: the index of the last token
+//
+// level: the level of the expression, incremented at each inner parenthesis
+func (r *Parser) ParseExpr(left, right int) (expr Expr) {
 	// Case of single token
-	if head == tail {
-		return r.Token[head]
+	if left == right {
+		return r.Token[left]
 	}
 
-	tmpHead, tmpTail := head, tail
+	tmpLeft, tmpRight := left, right
 
 	// Get most associated left and lowest precedence operator
-	lowest, pos := GetPrecedence(r.Token[tail].TokenType), tail
-	for head <= tail {
-		if IsOperator(r.Token[head].TokenType) {
-			if tmp := GetPrecedence(r.Token[head].TokenType); tmp >= lowest {
+	lowest, pos := GetPrecedence(GetType(r, left)), left
+	for left <= right {
+		typ := GetType(r, left)
+		// Normal operators
+		if IsOperator(typ) {
+			if tmp := GetPrecedence(typ); tmp >= lowest {
 				lowest = tmp
-				pos = head
+				pos = left
 			}
 		}
-		head += 1
+
+		left += 1
 	}
 
 	isBinary := true
 	// Define if binary or unary expression
-	if typ := r.Token[pos].TokenType; typ == Plus || typ == Minus {
+	if typ := GetType(r, pos); typ == Plus || typ == Minus {
 		if Prev(r, pos).TokenType == Number {
 			// Binary expression
 		} else {
@@ -110,9 +134,9 @@ func (r *Parser) ParseExpr(head, tail int) (expr Expr) {
 	// Parse binary
 	if isBinary {
 		expr = BinaryExpr{
-			Left:     r.ParseExpr(tmpHead, pos-1),
+			Left:     r.ParseExpr(tmpLeft, pos-1),
 			Operator: r.Token[pos],
-			Right:    r.ParseExpr(pos+1, tmpTail),
+			Right:    r.ParseExpr(pos+1, tmpRight),
 		}
 		return
 	}
@@ -120,7 +144,7 @@ func (r *Parser) ParseExpr(head, tail int) (expr Expr) {
 	// Parse unary
 	expr = UnaryExpr{
 		Operator: r.Token[pos],
-		Right:    r.ParseExpr(pos+1, tmpTail),
+		Right:    r.ParseExpr(pos+1, tmpRight),
 	}
 
 	return
@@ -133,7 +157,7 @@ func PrefixTraversal(expr Expr) string {
 	case UnaryExpr:
 		return v.Operator.Literal + "(" + PrefixTraversal(v.Right) + ")"
 	case BinaryExpr:
-		return v.Operator.Literal + "(" + PrefixTraversal(v.Left) + " " + PrefixTraversal(v.Right) + ")"
+		return "(" + v.Operator.Literal + " " + PrefixTraversal(v.Left) + " " + PrefixTraversal(v.Right) + ")"
 	}
 	return ""
 }
