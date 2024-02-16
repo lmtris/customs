@@ -3,11 +3,11 @@
 
 The specs of `customs` language is defined in this [blueprint](blueprint.md)
 
-## This Project
+## About
 
 This is a compiler for `customs` language written in Golang. It compiles the `customs` language into a `YAML` schema.
 
-## Checklist
+## Stages
 ### Define Language Specs
 - [x] Define the language
 ### Lexer
@@ -15,14 +15,14 @@ This is a compiler for `customs` language written in Golang. It compiles the `cu
 ### Parser
 - [x] Implement numeric expression parser
 - [ ] Support parenthesis
-- [ ] Support boolean expression
+- [x] Support boolean expression
 - [ ] Support string expression
-- [ ] Implement statement parser
-### Static Analysis
-- [ ] Implement static checker
+- [x] Implement statement parser
+### Semantic Analysis
+- [ ] Implement semantic analysis
 ### Code Generation
 - [ ] Implement ast to targeted `yaml` file
 
-## About
+## Contact
 For any concern please contact me at this [email](mailto:lwuminhtris@gmail.com)
 

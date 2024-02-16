@@ -16,6 +16,10 @@ type BinaryExpr struct {
 	Right    Expr
 }
 
+func (r BinaryExpr) String() string {
+	return PrefixTraversal(r)
+}
+
 func (r BinaryExpr) Accept(visitor ExprVisitor) {
 	visitor.VisitBinaryExp(r)
 }
@@ -27,6 +31,10 @@ type UnaryExpr struct {
 
 func (r UnaryExpr) Accept(visitor ExprVisitor) {
 	visitor.VisitUnaryExp(r)
+}
+
+func (r UnaryExpr) String() string {
+	return PrefixTraversal(r)
 }
 
 func (r Token) Accept(visitor ExprVisitor) {

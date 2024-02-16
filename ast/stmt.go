@@ -1,6 +1,8 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type StmtVisitor interface {
 	VisitLetStmt(LetStmt)
@@ -15,6 +17,15 @@ type Stmt interface {
 
 type Block []Stmt
 
+func (r Block) String() string {
+	str := "BlockStmt {\n"
+	for _, stmt := range r {
+		str += fmt.Sprintf("  %v\n", stmt)
+	}
+	str += "}"
+	return str
+}
+
 func (r Block) Accept(visitor StmtVisitor) {
 	visitor.VisitBlock(r)
 }
@@ -25,7 +36,7 @@ type LetStmt struct {
 }
 
 func (r LetStmt) String() string {
-	return fmt.Sprintf("LetStmt(%s, %s)", r.Ident, r.Exp)
+	return fmt.Sprintf("LetStmt {Id=%s Exp=%s}", r.Ident, r.Exp)
 
 }
 
@@ -39,6 +50,10 @@ type AssertStmt struct {
 	Exps  []Expr
 }
 
+func (r AssertStmt) String() string {
+	return fmt.Sprintf("AssertStmt {Ident=%s Alias=%s Exps=%s}", r.Ident, r.Alias, r.Exps)
+}
+
 func (r AssertStmt) Accept(visitor StmtVisitor) {
 	visitor.VisitAssertStmt(r)
 }
@@ -47,7 +62,11 @@ type ConstraintStmt struct {
 	Abstract bool
 	Ident    Token
 	Block    Block
-	Extends  Token
+	Extends  *Token
+}
+
+func (r ConstraintStmt) String() string {
+	return fmt.Sprintf("ConstraintStmt {Abstract=%v Ident=%v %v Extends=%v}", r.Abstract, r.Ident, r.Block, r.Extends)
 }
 
 func (r ConstraintStmt) Accept(visitor StmtVisitor) {

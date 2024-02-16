@@ -12,13 +12,15 @@ func GetPrecedence(typ TokenType) int {
 		return 1
 	case Plus, Minus:
 		return 2
+	case Gt, Gte, Lt, Lte:
+		return 3
 	default:
 		return -1
 	}
 }
 
 func IsOperator(typ TokenType) bool {
-	operators := []TokenType{Plus, Minus, Mul, Div}
+	operators := []TokenType{Plus, Minus, Mul, Div, Gt, Gte, Lt, Lte, Equal, NotEqual}
 	if slices.Contains(operators, typ) {
 		return true
 	}

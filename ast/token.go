@@ -41,6 +41,7 @@ type TokenType int
 
 const (
 	Let TokenType = iota
+	Arrow
 	Abstract
 	Constraint
 	Assert

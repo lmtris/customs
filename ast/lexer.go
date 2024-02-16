@@ -50,6 +50,11 @@ func (r Lexer) Scan() (tokens []Token, err error) {
 				index += 1
 				break
 			}
+			if r.peek(index+1) == '>' {
+				tokens = append(tokens, NewToken(Arrow, "=>", line, column))
+				index += 1
+				break
+			}
 			tokens = append(tokens, NewToken(Assign, "=", line, column))
 		case '>':
 			if r.peek(index+1) == '=' {

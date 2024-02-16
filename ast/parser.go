@@ -64,40 +64,108 @@ func (r *Parser) MatchAndConsume(tokenType TokenType) (Token, bool) {
 	return Token{}, false
 }
 
-// RemoveParenthesis removes all parenthesis from Parenthesis+ Token
-func RemoveParenthesis(tokens []Token) (num Token, ok bool) {
-	typs := []TokenType{LeftParen, RightParen, Number}
-
-	// Case check valid token types
-	for token := range tokens {
-		if !slices.Contains(typs, tokens[token].TokenType) {
-			return Token{}, false
+func (r *Parser) Parse() (stmts []Stmt) {
+	for !r.IsAtEnd() {
+		switch r.This().TokenType {
+		case Let:
+			stmts = append(stmts, r.ParseLetStmt())
+		case Assert:
+			stmts = append(stmts, r.ParseAssertStmt())
+		case Abstract, Constraint:
+			stmts = append(stmts, r.ParseConstraintStmt())
+		default:
+			r.Advance()
 		}
 	}
+	return
+}
 
-	// Check only one number
-	count := 0
-	for token := range tokens {
-		if tokens[token].TokenType == Number {
-			num = tokens[token]
-			count += 1
+func (r *Parser) ParseLetStmt() (stmt LetStmt) {
+	_, _ = r.MatchAndConsume(Let)
+	ident, _ := r.MatchAndConsume(Ident)
+	_, _ = r.MatchAndConsume(Equal)
+
+	// Find the end of expression
+	right := r.current
+	for GetType(r, right) != Semicolon && GetType(r, right) != Eof {
+		right += 1
+	}
+
+	exp := r.ParseExpr(r.current+1, right-1)
+	r.current = right
+	return LetStmt{Ident: ident, Exp: exp}
+}
+
+func (r *Parser) ParseAssertStmt() (stmt AssertStmt) {
+	_, _ = r.MatchAndConsume(Assert)
+	stmt.Ident, _ = r.MatchAndConsume(Ident)
+	_, aliased := r.MatchAndConsume(LeftParen)
+
+	// If having alias
+	if aliased {
+		stmt.Alias, _ = r.MatchAndConsume(Ident)
+		_, _ = r.MatchAndConsume(RightParen)
+	}
+
+	_, _ = r.MatchAndConsume(Arrow)
+	_, _ = r.MatchAndConsume(LeftBrace)
+
+	var exps []Expr
+	for r.This().TokenType != RightBrace {
+		left, right := r.current, r.current
+		for r.This().TokenType != Semicolon {
+			r.Advance()
 		}
+		right = r.current
+		expr := r.ParseExpr(left, right-1)
+		exps = append(exps, expr)
+		r.Advance()
 	}
 
-	if count != 1 {
-		return Token{}, false
+	stmt.Exps = exps
+
+	return
+}
+
+func (r *Parser) ParseConstraintStmt() (stmt ConstraintStmt) {
+	_, stmt.Abstract = r.MatchAndConsume(Abstract)
+	_, _ = r.MatchAndConsume(Constraint)
+	stmt.Ident, _ = r.MatchAndConsume(Ident)
+	stmt.Extends = nil
+
+	// Unexpected token
+	if r.This().TokenType != LeftBrace {
+		return ConstraintStmt{}
 	}
 
-	return num, true
+	// Find the end of block
+	var block []Token
+	for balance := 1; balance != 0 && r.This().TokenType != Eof; {
+		if r.This().TokenType == LeftBrace {
+			balance += 1
+		}
+
+		if r.This().TokenType == RightBrace {
+			balance -= 1
+		}
+
+		block = append(block, r.This())
+
+		r.Advance()
+	}
+
+	block = block[1 : len(block)-1]
+	block = append(block, NewToken(Eof, "", 0, 0))
+	blockParser := NewParser(block)
+	stmt.Block = blockParser.Parse()
+	return
 }
 
 // ParseExpr parses an expression from a list of tokens
 //
-// head: the index of the first token
+// left: the index of the first token
 //
-// tail: the index of the last token
-//
-// level: the level of the expression, incremented at each inner parenthesis
+// right: the index of the last token
 func (r *Parser) ParseExpr(left, right int) (expr Expr) {
 	// Case of single token
 	if left == right {
