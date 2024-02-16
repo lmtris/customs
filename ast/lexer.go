@@ -71,7 +71,7 @@ func (r Lexer) Scan() (tokens []Token, err error) {
 			}
 			tokens = append(tokens, NewToken(Lt, "<", line, column))
 		default:
-			/// Num
+			/// Number
 			if r.isDigit(word) {
 				num := []rune{word}
 				for !r.isEof(index+1) && r.isDigit(r.peek(index+1)) {

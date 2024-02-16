@@ -1,13 +1,13 @@
 package ast
 
 type ExprVisitor interface {
-	VisitBinaryExp(BinaryExpr)
-	VisitUnaryExp(UnaryExpr)
-	VisitToken(Token)
+	VisitBinaryExp(BinaryExpr) Type
+	VisitUnaryExp(UnaryExpr) Type
+	VisitToken(Token) Type
 }
 
 type Expr interface {
-	Accept(ExprVisitor)
+	Accept(ExprVisitor) Type
 }
 
 type BinaryExpr struct {
@@ -20,8 +20,9 @@ func (r BinaryExpr) String() string {
 	return PrefixTraversal(r)
 }
 
-func (r BinaryExpr) Accept(visitor ExprVisitor) {
-	visitor.VisitBinaryExp(r)
+func (r BinaryExpr) Accept(v ExprVisitor) (typ Type) {
+	typ = v.VisitBinaryExp(r)
+	return
 }
 
 type UnaryExpr struct {
@@ -29,14 +30,16 @@ type UnaryExpr struct {
 	Right    Expr
 }
 
-func (r UnaryExpr) Accept(visitor ExprVisitor) {
-	visitor.VisitUnaryExp(r)
+func (r UnaryExpr) Accept(v ExprVisitor) (typ Type) {
+	typ = v.VisitUnaryExp(r)
+	return
 }
 
 func (r UnaryExpr) String() string {
 	return PrefixTraversal(r)
 }
 
-func (r Token) Accept(visitor ExprVisitor) {
-	visitor.VisitToken(r)
+func (r Token) Accept(v ExprVisitor) (typ Type) {
+	typ = v.VisitToken(r)
+	return
 }

@@ -5,10 +5,19 @@ import "fmt"
 type Token struct {
 	TokenType
 	Literal string
-	Lexeme  string
+	Typ     Type
 	Line    int
 	Column  int
 }
+
+type Type string
+
+const (
+	Integer Type = "int"
+	Bool    Type = "bool"
+	Float   Type = "float"
+	String  Type = "string"
+)
 
 func NewToken(typ TokenType, lit string, line, column int) Token {
 	return Token{TokenType: typ, Literal: lit, Line: line, Column: column}
@@ -34,7 +43,7 @@ func NewOperator(typ TokenType, lit string, line, column, left, right int) Token
 }
 
 func (r Token) String() string {
-	return fmt.Sprintf("<%s Lit=%s Line=%d Col=%d>", r.TokenType, r.Literal, r.Line, r.Column)
+	return fmt.Sprintf("<%s %s %s>", r.TokenType, r.Literal, r.Typ)
 }
 
 type TokenType int
@@ -121,9 +130,9 @@ func (r TokenType) String() string {
 	case NotEqual:
 		return "NOT_EQUAL"
 	case Number:
-		return "NUMBER"
+		return "NUM"
 	case Ident:
-		return "IDENT"
+		return "ID"
 	case Eof:
 		return "EOF"
 	}

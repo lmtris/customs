@@ -1,18 +1,17 @@
 package ast
 
 import (
+	"fmt"
 	"slices"
 )
 
 type Parser struct {
 	Token   []Token
 	current int
-	head    int
-	tail    int
 }
 
 func NewParser(tokens []Token) Parser {
-	return Parser{Token: tokens, current: 0, head: 0, tail: len(tokens)}
+	return Parser{Token: tokens, current: 0}
 }
 
 func (r *Parser) This() Token {
@@ -168,8 +167,13 @@ func (r *Parser) ParseConstraintStmt() (stmt ConstraintStmt) {
 // right: the index of the last token
 func (r *Parser) ParseExpr(left, right int) (expr Expr) {
 	// Case of single token
-	if left == right {
-		return r.Token[left]
+	if token := r.Token[left]; left == right {
+		switch token.TokenType {
+		case Ident, Number:
+			return token
+		default:
+			panic(fmt.Sprintf("Unexpected token: %v", token))
+		}
 	}
 
 	tmpLeft, tmpRight := left, right
@@ -192,7 +196,7 @@ func (r *Parser) ParseExpr(left, right int) (expr Expr) {
 	isBinary := true
 	// Define if binary or unary expression
 	if typ := GetType(r, pos); typ == Plus || typ == Minus {
-		if Prev(r, pos).TokenType == Number {
+		if Prev(r, pos).TokenType == Number || Prev(r, pos).TokenType == Ident {
 			// Binary expression
 		} else {
 			isBinary = false

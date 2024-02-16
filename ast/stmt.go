@@ -36,8 +36,7 @@ type LetStmt struct {
 }
 
 func (r LetStmt) String() string {
-	return fmt.Sprintf("LetStmt {Id=%s Exp=%s}", r.Ident, r.Exp)
-
+	return fmt.Sprintf("LetStmt {Ident=%s Exp=%s}", r.Ident, r.Exp)
 }
 
 func (r LetStmt) Accept(visitor StmtVisitor) {

@@ -16,7 +16,7 @@ import (
 //	parser := NewParser(tokens)
 //	expr := parser.ParseExpr(0, len(tokens)-3)
 //	fmt.Printf("input = %v", input)
-//	fmt.Printf("stmt => %v\n", PrefixTraversal(expr))
+//	fmt.Printf("stmts => %v\n", PrefixTraversal(expr))
 //}
 //
 //func TestParser_ParseExprIntermediate(t *testing.T) {
@@ -30,7 +30,7 @@ import (
 //	parser := NewParser(tokens)
 //	expr := parser.ParseExpr(0, len(tokens)-3)
 //	fmt.Printf("input = %v", input)
-//	fmt.Printf("stmt => %v\n", PrefixTraversal(expr))
+//	fmt.Printf("stmts => %v\n", PrefixTraversal(expr))
 //}
 //
 //func TestParser_ParseExprAdvance(t *testing.T) {
@@ -44,7 +44,7 @@ import (
 //	parser := NewParser(tokens)
 //	expr := parser.ParseExpr(0, len(tokens)-3)
 //	fmt.Printf("input = %v", input)
-//	fmt.Printf("stmt => %v\n", PrefixTraversal(expr))
+//	fmt.Printf("stmts => %v\n", PrefixTraversal(expr))
 //}
 
 func TestParser_ParseLetStmt(t *testing.T) {
@@ -58,7 +58,7 @@ func TestParser_ParseLetStmt(t *testing.T) {
 	parser := NewParser(tokens)
 	stmt := parser.Parse()
 	fmt.Printf("input = %v", input)
-	fmt.Printf("stmt => %v\n", stmt)
+	fmt.Printf("stmts => %v\n", stmt)
 }
 
 // a > b is valid, a > b > c is invalid
@@ -84,9 +84,9 @@ func TestParser_ParseConstraintStmt(t *testing.T) {
 	stmt := parser.Parse()
 	//fmt.Printf("input = %v", input)
 	for _, s := range stmt {
-		fmt.Printf("stmt => %v\n", s)
+		fmt.Printf("stmts => %v\n", s)
 	}
-	//fmt.Printf("stmt => %v\n", stmt)
+	//fmt.Printf("stmts => %v\n", stmts)
 }
 
 func TestParser_ParseConstraintStmt2(t *testing.T) {
@@ -112,7 +112,7 @@ func TestParser_ParseConstraintStmt2(t *testing.T) {
 	parser := NewParser(tokens)
 	stmt := parser.Parse()
 	for _, s := range stmt {
-		fmt.Printf("stmt => %v\n", s)
+		fmt.Printf("stmts => %v\n", s)
 	}
-	//fmt.Printf("stmt => %v\n", stmt)
+	//fmt.Printf("stmts => %v\n", stmts)
 }
