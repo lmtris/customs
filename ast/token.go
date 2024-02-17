@@ -5,6 +5,7 @@ import "fmt"
 type Token struct {
 	TokenType
 	Literal string
+	Val     interface{}
 	Typ     Type
 	Line    int
 	Column  int
@@ -22,6 +23,10 @@ const (
 
 func NewToken(typ TokenType, lit string, line, column int) Token {
 	return Token{TokenType: typ, Literal: lit, Line: line, Column: column}
+}
+
+func NewNumber(typ TokenType, lit string, line, column int) Token {
+	return Token{TokenType: typ, Literal: lit, Typ: Integer, Line: line, Column: column}
 }
 
 // Precedence Order Table
@@ -44,7 +49,7 @@ func NewOperator(typ TokenType, lit string, line, column, left, right int) Token
 }
 
 func (r Token) String() string {
-	return fmt.Sprintf("<%s %s %s>", r.TokenType, r.Literal, r.Typ)
+	return fmt.Sprintf("<%s %s %v %s>", r.TokenType, r.Literal, r.Val, r.Typ)
 }
 
 type TokenType int

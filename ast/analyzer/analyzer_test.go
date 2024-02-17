@@ -1,6 +1,7 @@
-package ast
+package analyzer
 
 import (
+	"customs/ast"
 	"testing"
 )
 
@@ -10,8 +11,8 @@ func TestChecker_VisitLetStmt(t *testing.T) {
 	let z = x > y;
 	let k = 10 * 100 + 30;
 	`
-	tokens, _ := Lexer{Text: input}.Scan()
-	parser := NewParser(tokens)
+	tokens, _ := ast.Lexer{Text: input}.Scan()
+	parser := ast.NewParser(tokens)
 	stmts := parser.Parse()
 	checker := NewAnalyzer(stmts)
 	checker.Check()
@@ -28,8 +29,8 @@ func TestChecker_VisitConstraintStmt(t *testing.T) {
 		}
 	}
 	`
-	tokens, _ := Lexer{Text: input}.Scan()
-	parser := NewParser(tokens)
+	tokens, _ := ast.Lexer{Text: input}.Scan()
+	parser := ast.NewParser(tokens)
 	stmts := parser.Parse()
 	checker := NewAnalyzer(stmts)
 	checker.Check()
@@ -49,8 +50,8 @@ func TestChecker_VisitConstraintStmt2(t *testing.T) {
 		}
 	}
 	`
-	tokens, _ := Lexer{Text: input}.Scan()
-	parser := NewParser(tokens)
+	tokens, _ := ast.Lexer{Text: input}.Scan()
+	parser := ast.NewParser(tokens)
 	stmts := parser.Parse()
 	checker := NewAnalyzer(stmts)
 	checker.Check()

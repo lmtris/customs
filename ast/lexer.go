@@ -78,7 +78,7 @@ func (r Lexer) Scan() (tokens []Token, err error) {
 					num = append(num, r.peek(index+1))
 					index += 1
 				}
-				tokens = append(tokens, NewToken(Number, string(num), line, column))
+				tokens = append(tokens, NewNumber(Number, string(num), line, column))
 			}
 			/// Letter
 			if r.isLetter(word) {

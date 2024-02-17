@@ -1,48 +1,49 @@
-package ast
+package analyzer
 
 import (
+	"customs/ast"
 	"fmt"
 	"slices"
 )
 
 type Analyzer struct {
-	stmts []Stmt // global statements
-	stack map[string]Token
-	local map[string]Token
+	Stmts []ast.Stmt // global statements
+	stack map[string]ast.Token
+	local map[string]ast.Token
 }
 
-func (r *Analyzer) GetOperatorType(op Token) Type {
-	intOps := []TokenType{Plus, Minus, Mul, Div}
-	boolOps := []TokenType{Equal, NotEqual, Lt, Lte, Gt, Gte}
+func (r *Analyzer) GetOperatorType(op ast.Token) ast.Type {
+	intOps := []ast.TokenType{ast.Plus, ast.Minus, ast.Mul, ast.Div}
+	boolOps := []ast.TokenType{ast.Equal, ast.NotEqual, ast.Lt, ast.Lte, ast.Gt, ast.Gte}
 
 	if slices.Contains(intOps, op.TokenType) {
-		return Integer
+		return ast.Integer
 	}
 
 	if slices.Contains(boolOps, op.TokenType) {
-		return Bool
+		return ast.Bool
 	}
 
-	return Any
+	return ast.Any
 }
 
-func (r *Analyzer) VisitBinaryExp(expr BinaryExpr) (typ Type) {
+func (r *Analyzer) VisitBinaryExp(expr ast.BinaryExpr) (typ ast.Type) {
 
 	left, right := expr.Left.Accept(r), expr.Right.Accept(r)
 
 	switch r.GetOperatorType(expr.Operator) {
-	case Integer:
-		if left == Integer && left == right {
-			typ = Integer
+	case ast.Integer:
+		if left == ast.Integer && left == right {
+			typ = ast.Integer
 		} else {
-			panic(TypeMismatchError(expr.Operator, left, right))
+			panic(ast.TypeMismatchError(expr.Operator, left, right))
 		}
 
-	case Bool:
+	case ast.Bool:
 		if left == right {
-			typ = Bool
+			typ = ast.Bool
 		} else {
-			panic(TypeMismatchError(expr.Operator, left, right))
+			panic(ast.TypeMismatchError(expr.Operator, left, right))
 		}
 
 	default:
@@ -52,15 +53,15 @@ func (r *Analyzer) VisitBinaryExp(expr BinaryExpr) (typ Type) {
 	return
 }
 
-func (r *Analyzer) VisitUnaryExp(expr UnaryExpr) Type {
+func (r *Analyzer) VisitUnaryExp(expr ast.UnaryExpr) ast.Type {
 	return expr.Right.Accept(r)
 }
 
-func (r *Analyzer) VisitToken(token Token) Type {
+func (r *Analyzer) VisitToken(token ast.Token) ast.Type {
 	switch typ := token.TokenType; typ {
-	case Number:
-		return Integer
-	case Ident:
+	case ast.Number:
+		return ast.Integer
+	case ast.Ident:
 		// First search in local scope
 		if v, ok := r.local[token.Literal]; ok {
 			return v.Typ
@@ -77,19 +78,19 @@ func (r *Analyzer) VisitToken(token Token) Type {
 	}
 }
 
-func NewAnalyzer(stmts []Stmt) Analyzer {
-	return Analyzer{stmts: stmts, stack: make(map[string]Token), local: make(map[string]Token)}
+func NewAnalyzer(stmts []ast.Stmt) Analyzer {
+	return Analyzer{Stmts: stmts, stack: make(map[string]ast.Token), local: make(map[string]ast.Token)}
 }
 
 func (r *Analyzer) Check() {
-	for _, stmt := range r.stmts {
+	for _, stmt := range r.Stmts {
 		stmt.Accept(r)
 	}
 }
 
-func (r *Analyzer) VisitLetStmt(stmt LetStmt) {
+func (r *Analyzer) VisitLetStmt(stmt ast.LetStmt) {
 	// Check if variable is already defined
-	if v, ok := r.stack[stmt.Ident.Literal]; ok {
+	if v, ok := r.local[stmt.Ident.Literal]; ok {
 		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Ident.Literal, v.Line, v.Column))
 	}
 
@@ -99,7 +100,7 @@ func (r *Analyzer) VisitLetStmt(stmt LetStmt) {
 	r.local[stmt.Ident.Literal] = stmt.Ident
 }
 
-func (r *Analyzer) VisitAssertStmt(stmt AssertStmt) {
+func (r *Analyzer) VisitAssertStmt(stmt ast.AssertStmt) {
 	// Check existed assert name
 	if v, ok := r.stack[stmt.Ident.Literal]; ok {
 		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Ident.Literal, v.Line, v.Column))
@@ -111,7 +112,7 @@ func (r *Analyzer) VisitAssertStmt(stmt AssertStmt) {
 	}
 
 	// Type inference, if expr
-	stmt.Ident.Typ, stmt.Alias.Typ = Integer, Integer
+	stmt.Ident.Typ, stmt.Alias.Typ = ast.Integer, ast.Integer
 	r.stack[stmt.Ident.Literal] = stmt.Ident
 	r.stack[stmt.Alias.Literal] = stmt.Alias
 
@@ -123,7 +124,7 @@ func (r *Analyzer) VisitAssertStmt(stmt AssertStmt) {
 	env.Check()
 }
 
-func (r *Analyzer) VisitConstraintStmt(stmt ConstraintStmt) {
+func (r *Analyzer) VisitConstraintStmt(stmt ast.ConstraintStmt) {
 	// Check if constraint is already defined
 	if v, ok := r.stack[stmt.Ident.Literal]; ok {
 		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Ident.Literal, v.Line, v.Column))
@@ -135,17 +136,17 @@ func (r *Analyzer) VisitConstraintStmt(stmt ConstraintStmt) {
 	r.VisitBlock(stmt.Block)
 }
 
-func NewAnalyzerWithStack(stmts []Stmt, stack map[string]Token) Analyzer {
-	return Analyzer{stmts: stmts, stack: stack, local: make(map[string]Token)}
+func NewAnalyzerWithStack(stmts []ast.Stmt, stack map[string]ast.Token) Analyzer {
+	return Analyzer{Stmts: stmts, stack: stack, local: make(map[string]ast.Token)}
 }
 
-func (r *Analyzer) VisitBlock(stmt Block) {
+func (r *Analyzer) VisitBlock(stmt ast.Block) {
 	env := NewAnalyzerWithStack(stmt, MergeStacks(r.local, r.stack))
 	env.Check()
 }
 
-func MergeStacks(local, stack map[string]Token) (st map[string]Token) {
-	st = make(map[string]Token)
+func MergeStacks(local, stack map[string]ast.Token) (st map[string]ast.Token) {
+	st = make(map[string]ast.Token)
 
 	for k, v := range local {
 		st[k] = v

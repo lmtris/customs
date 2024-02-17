@@ -11,22 +11,43 @@ This is a compiler for `customs` language written in Golang. It compiles the `cu
 ### Define Language Specs
 - [x] Define the language
 ### Lexer
+- [x] Define tokens
+  - [ ] Support float, string 
 - [x] Implement scanner
 ### Parser
-- [x] Implement numeric expression parser
-- [ ] Support parenthesis
-- [x] Support boolean expression
-- [ ] Support string expression
+- [ ] Implement sane error handler
+
+
+- [x] Implement expression parser 
+  - [x] Parse unary expression
+  - [x] Parse binary expression
+  - [x] Parse token expression
+  - [x] Parse boolean expression
+  - [ ] Support parenthesis
+  - [ ] Support string expression
+
+
 - [x] Implement statement parser
+  - [x] Implement constraint statement
+  - [x] Implement let statement
+  - [x] Implement assert statement
 ### Semantic Analysis
 - [x] Variable type inference
+
+
 - [x] Implement semantic analysis
   - [x] Check for duplicate identifier
   - [x] Check for undeclared identifier
   - [x] Check for type mismatch
+  - [ ] Check assert expression cross constraints
 ### Code Generation
-- [ ] Implement ast to targeted `yaml` file
-
+- [x] Implement ast to targeted `yaml` file
+## Todo
+- Support `float`, `string` and `boolean`
+- Support `parenthesis`
+- Implement error handler, quick return error when error is found
+- Restrict only `assert` statements are allowed to be nested in other `assert` statements
+- Refactor the codebase
 ## Contact
 For any concern please contact me at this [email](mailto:lwuminhtris@gmail.com)
 
