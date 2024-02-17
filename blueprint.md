@@ -4,12 +4,15 @@
 abstract constraint Root {
     let threshold = 2 * (30 - 10 / 2);
     assert token (t) => {
-        t > 0 and t < 100;
+        t > 0;
+        t < 100;
     };
-    assert usage => usage is not empty;
-    assert extra_info {
-        assert name (n) => n is not empty;
-    };
+    assert usage => {
+        usage it not empty;
+    }
+    assert extra_info => {
+        assert name => name is not empty;
+    } 
 }
 
 constraint RegisterApi extends Root;

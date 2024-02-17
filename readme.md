@@ -11,7 +11,7 @@ This is a compiler for `customs` language written in Golang. It compiles the `cu
 ### Define Language Specs
 - [x] Define the language
 ### Lexer
-- [x] Implement lexer
+- [x] Implement scanner
 ### Parser
 - [x] Implement numeric expression parser
 - [ ] Support parenthesis
@@ -19,7 +19,11 @@ This is a compiler for `customs` language written in Golang. It compiles the `cu
 - [ ] Support string expression
 - [x] Implement statement parser
 ### Semantic Analysis
-- [ ] Implement semantic analysis
+- [x] Variable type inference
+- [x] Implement semantic analysis
+  - [x] Check for duplicate identifier
+  - [x] Check for undeclared identifier
+  - [x] Check for type mismatch
 ### Code Generation
 - [ ] Implement ast to targeted `yaml` file
 

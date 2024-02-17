@@ -98,6 +98,7 @@ func (r *Parser) ParseLetStmt() (stmt LetStmt) {
 func (r *Parser) ParseAssertStmt() (stmt AssertStmt) {
 	_, _ = r.MatchAndConsume(Assert)
 	stmt.Ident, _ = r.MatchAndConsume(Ident)
+	stmt.Alias = stmt.Ident // default alias
 	_, aliased := r.MatchAndConsume(LeftParen)
 
 	// If having alias
@@ -110,7 +111,14 @@ func (r *Parser) ParseAssertStmt() (stmt AssertStmt) {
 	_, _ = r.MatchAndConsume(LeftBrace)
 
 	var exps []Expr
+	var nested []Stmt
 	for r.This().TokenType != RightBrace {
+
+		if r.This().TokenType == Assert {
+			nested = append(nested, r.ParseAssertStmt())
+			continue
+		}
+
 		left, right := r.current, r.current
 		for r.This().TokenType != Semicolon {
 			r.Advance()
@@ -122,6 +130,7 @@ func (r *Parser) ParseAssertStmt() (stmt AssertStmt) {
 	}
 
 	stmt.Exps = exps
+	stmt.NestedAsserts = nested
 
 	return
 }

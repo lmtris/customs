@@ -17,6 +17,7 @@ const (
 	Bool    Type = "bool"
 	Float   Type = "float"
 	String  Type = "string"
+	Any     Type = "any"
 )
 
 func NewToken(typ TokenType, lit string, line, column int) Token {

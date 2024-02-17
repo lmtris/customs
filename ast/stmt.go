@@ -44,13 +44,14 @@ func (r LetStmt) Accept(visitor StmtVisitor) {
 }
 
 type AssertStmt struct {
-	Ident Token
-	Alias Token
-	Exps  []Expr
+	Ident         Token
+	Alias         Token
+	Exps          []Expr
+	NestedAsserts []Stmt
 }
 
 func (r AssertStmt) String() string {
-	return fmt.Sprintf("AssertStmt {Ident=%s Alias=%s Exps=%s}", r.Ident, r.Alias, r.Exps)
+	return fmt.Sprintf("AssertStmt {Ident=%s Alias=%s Exps=%s NestedAsserts=%v}", r.Ident, r.Alias, r.Exps, r.NestedAsserts)
 }
 
 func (r AssertStmt) Accept(visitor StmtVisitor) {
