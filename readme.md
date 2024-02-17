@@ -43,11 +43,16 @@ This is a compiler for `customs` language written in Golang. It compiles the `cu
 ### Code Generation
 - [x] Implement ast to targeted `yaml` file
 ## Todo
+### Minor changes
 - Support `float`, `string` and `boolean`
 - Support `parenthesis`
 - Implement error handler, quick return error when error is found
 - Restrict only `assert` statements are allowed to be nested in other `assert` statements
 - Refactor the codebase
+
+### Major changes
+- Supports inheritance (abstract and extends)
+- Implement WASM for this compiler
 ## Contact
 For any concern please contact me at this [email](mailto:lwuminhtris@gmail.com)
 
