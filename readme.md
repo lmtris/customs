@@ -8,14 +8,17 @@ The specs of `customs` language is defined in this [blueprint](blueprint.md)
 This is a compiler for `customs` language written in Golang. It compiles the `customs` language into a `YAML` schema.
 
 ## Stages
+- ``18/02/2024`` first release
+- ``19/02/2024`` major refactoring
+
 ### Define Language Specs
 - [x] Define the language
 ### Lexer
 - [x] Define tokens
-  - [ ] Support float, string 
+  - [x] Support `float`, `string`, `integer`, `boolean`
 - [x] Implement scanner
 ### Parser
-- [ ] Implement sane error handler
+- [x] Implement sane error handler
 
 
 - [x] Implement expression parser 
@@ -23,7 +26,7 @@ This is a compiler for `customs` language written in Golang. It compiles the `cu
   - [x] Parse binary expression
   - [x] Parse token expression
   - [x] Parse boolean expression
-  - [ ] Support parenthesis
+  - [x] Support parenthesis
   - [ ] Support string expression
 
 

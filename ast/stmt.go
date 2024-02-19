@@ -5,70 +5,67 @@ import (
 )
 
 type StmtVisitor interface {
-	VisitLetStmt(LetStmt)
-	VisitAssertStmt(AssertStmt)
+	VisitAssignStmt(AssignStmt)
 	VisitConstraintStmt(ConstraintStmt)
-	VisitBlock(Block)
+	VisitAssertStmt(AssertStmt)
 }
 
 type Stmt interface {
 	Accept(StmtVisitor)
 }
 
-type Block []Stmt
-
-func (r Block) String() string {
-	str := "BlockStmt {\n"
-	for _, stmt := range r {
-		str += fmt.Sprintf("  %v\n", stmt)
-	}
-	str += "}"
-	return str
+type AssignStmt struct {
+	Id   Token
+	Expr Expr
 }
 
-func (r Block) Accept(visitor StmtVisitor) {
-	visitor.VisitBlock(r)
+func (r AssignStmt) String() string {
+	return fmt.Sprintf("AssignStmt{%s %s}", r.Id, PrefixTraversal(r.Expr))
 }
 
-type LetStmt struct {
-	Ident Token
-	Exp   Expr
-}
-
-func (r LetStmt) String() string {
-	return fmt.Sprintf("LetStmt {Ident=%s Exp=%s}", r.Ident, r.Exp)
-}
-
-func (r LetStmt) Accept(visitor StmtVisitor) {
-	visitor.VisitLetStmt(r)
-}
-
-type AssertStmt struct {
-	Ident         Token
-	Alias         Token
-	Exps          []Expr
-	NestedAsserts []Stmt
-}
-
-func (r AssertStmt) String() string {
-	return fmt.Sprintf("AssertStmt {Ident=%s Alias=%s Exps=%s NestedAsserts=%v}", r.Ident, r.Alias, r.Exps, r.NestedAsserts)
-}
-
-func (r AssertStmt) Accept(visitor StmtVisitor) {
-	visitor.VisitAssertStmt(r)
+func (r AssignStmt) Accept(v StmtVisitor) {
+	v.VisitAssignStmt(r)
 }
 
 type ConstraintStmt struct {
-	Abstract bool
-	Ident    Token
-	Block    Block
-	Extends  *Token
+	IsAbstract       bool
+	Id               Token
+	ParentConstraint Token
+	LetStmts         []AssignStmt
+	AssertStmts      []AssertStmt
 }
 
 func (r ConstraintStmt) String() string {
-	return fmt.Sprintf("ConstraintStmt {Abstract=%v Ident=%v %v Extends=%v}", r.Abstract, r.Ident, r.Block, r.Extends)
+	return fmt.Sprintf("ConstraintStmt{%s %v %v}", r.Id, r.LetStmts, r.AssertStmts)
 }
 
-func (r ConstraintStmt) Accept(visitor StmtVisitor) {
-	visitor.VisitConstraintStmt(r)
+func (r ConstraintStmt) Accept(v StmtVisitor) {
+	v.VisitConstraintStmt(r)
+}
+
+type AssertStmt struct {
+	Id    Token
+	Alias Token
+	Exprs []Expr
+	Stmts []AssertStmt
+}
+
+func (r AssertStmt) String() string {
+	return fmt.Sprintf("AssertStmt{%s %s %v}", r.Id, r.Alias, r.Exprs)
+}
+
+func (r AssertStmt) Accept(v StmtVisitor) {
+	v.VisitAssertStmt(r)
+}
+
+func PrefixTraversal(expr Expr) string {
+	switch v := expr.(type) {
+	case Token:
+		return v.Literal
+	case UnaryExpr:
+		return v.Op.Literal + "(" + PrefixTraversal(v.Expr) + ")"
+	case BinaryExpr:
+		return "(" + v.Op.Literal + " " + PrefixTraversal(v.Left) + " " + PrefixTraversal(v.Right) + ")"
+	}
+	return ""
 }

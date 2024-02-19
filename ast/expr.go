@@ -1,45 +1,34 @@
 package ast
 
 type ExprVisitor interface {
-	VisitBinaryExp(BinaryExpr) Type
-	VisitUnaryExp(UnaryExpr) Type
-	VisitToken(Token) Type
+	VisitBinaryExpr(BinaryExpr) LiteralType
+	VisitUnaryExpr(UnaryExpr) LiteralType
+	VisitToken(Token) LiteralType
 }
 
 type Expr interface {
-	Accept(ExprVisitor) Type
+	Accept(ExprVisitor) LiteralType
 }
 
 type BinaryExpr struct {
-	Left     Expr
-	Operator Token
-	Right    Expr
+	Left  Expr
+	Op    Token
+	Right Expr
 }
 
-func (r BinaryExpr) String() string {
-	return PrefixTraversal(r)
-}
-
-func (r BinaryExpr) Accept(v ExprVisitor) (typ Type) {
-	typ = v.VisitBinaryExp(r)
-	return
+func (r BinaryExpr) Accept(v ExprVisitor) LiteralType {
+	return v.VisitBinaryExpr(r)
 }
 
 type UnaryExpr struct {
-	Operator Token
-	Right    Expr
+	Op   Token
+	Expr Expr
 }
 
-func (r UnaryExpr) Accept(v ExprVisitor) (typ Type) {
-	typ = v.VisitUnaryExp(r)
-	return
+func (r UnaryExpr) Accept(v ExprVisitor) LiteralType {
+	return v.VisitUnaryExpr(r)
 }
 
-func (r UnaryExpr) String() string {
-	return PrefixTraversal(r)
-}
-
-func (r Token) Accept(v ExprVisitor) (typ Type) {
-	typ = v.VisitToken(r)
-	return
+func (r Token) Accept(v ExprVisitor) LiteralType {
+	return v.VisitToken(r)
 }

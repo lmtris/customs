@@ -1,14 +1,14 @@
 package ast
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
-type SemanticAnalysisError string
-
-func getPosition(token Token) string {
-	return fmt.Sprintf("%v:%v", token.Line, token.Column)
+func Debug(line, col int) string {
+	return fmt.Sprintf("[%d:%d]", line, col)
 }
 
-func TypeMismatchError(operator Token, left, right Type) SemanticAnalysisError {
-	err := getPosition(operator) + fmt.Sprintf(" Type mismatch: Expected same type, got %v and %v", left, right)
-	return SemanticAnalysisError(err)
+func InvalidTokenErr(line, col int) error {
+	return errors.New(fmt.Sprintf(Debug(line, col) + " Invalid token"))
 }

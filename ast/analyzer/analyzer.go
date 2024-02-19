@@ -1,163 +1,113 @@
 package analyzer
 
-import (
-	"customs/ast"
-	"fmt"
-	"slices"
-)
+import v2 "customs/ast"
 
 type Analyzer struct {
-	Stmts []ast.Stmt // global statements
-	stack map[string]ast.Token
-	local map[string]ast.Token
+	Stmt  []v2.Stmt
+	stack map[string]v2.Token
+	local map[string]v2.Token
 }
 
-func (r *Analyzer) GetOperatorType(op ast.Token) ast.Type {
-	intOps := []ast.TokenType{ast.Plus, ast.Minus, ast.Mul, ast.Div}
-	boolOps := []ast.TokenType{ast.Equal, ast.NotEqual, ast.Lt, ast.Lte, ast.Gt, ast.Gte}
-
-	if slices.Contains(intOps, op.TokenType) {
-		return ast.Integer
-	}
-
-	if slices.Contains(boolOps, op.TokenType) {
-		return ast.Bool
-	}
-
-	return ast.Any
+func NewAnalyzer(stmt []v2.Stmt) Analyzer {
+	return Analyzer{Stmt: stmt, stack: make(map[string]v2.Token), local: make(map[string]v2.Token)}
 }
 
-func (r *Analyzer) VisitBinaryExp(expr ast.BinaryExpr) (typ ast.Type) {
-
-	left, right := expr.Left.Accept(r), expr.Right.Accept(r)
-
-	switch r.GetOperatorType(expr.Operator) {
-	case ast.Integer:
-		if left == ast.Integer && left == right {
-			typ = ast.Integer
-		} else {
-			panic(ast.TypeMismatchError(expr.Operator, left, right))
-		}
-
-	case ast.Bool:
-		if left == right {
-			typ = ast.Bool
-		} else {
-			panic(ast.TypeMismatchError(expr.Operator, left, right))
-		}
-
-	default:
-		panic(fmt.Sprintf("Unexpected operator: %v", expr.Operator))
-	}
-
-	return
-}
-
-func (r *Analyzer) VisitUnaryExp(expr ast.UnaryExpr) ast.Type {
-	return expr.Right.Accept(r)
-}
-
-func (r *Analyzer) VisitToken(token ast.Token) ast.Type {
-	switch typ := token.TokenType; typ {
-	case ast.Number:
-		return ast.Integer
-	case ast.Ident:
-		// First search in local scope
-		if v, ok := r.local[token.Literal]; ok {
-			return v.Typ
-		}
-
-		// Then search in parent scope
-		if v, ok := r.stack[token.Literal]; ok {
-			return v.Typ
-		}
-
-		panic(fmt.Sprintf("Undefined variable: %s", token.Literal))
-	default:
-		panic(fmt.Sprintf("%v:%v Unexpected token: %v", token.Line, token.Column, token))
-	}
-}
-
-func NewAnalyzer(stmts []ast.Stmt) Analyzer {
-	return Analyzer{Stmts: stmts, stack: make(map[string]ast.Token), local: make(map[string]ast.Token)}
-}
-
-func (r *Analyzer) Check() {
-	for _, stmt := range r.Stmts {
+func (r *Analyzer) Analyze() {
+	for _, stmt := range r.Stmt {
 		stmt.Accept(r)
 	}
 }
 
-func (r *Analyzer) VisitLetStmt(stmt ast.LetStmt) {
-	// Check if variable is already defined
-	if v, ok := r.local[stmt.Ident.Literal]; ok {
-		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Ident.Literal, v.Line, v.Column))
-	}
-
-	// Type inference
-	stmt.Ident.Typ = stmt.Exp.Accept(r)
-
-	r.local[stmt.Ident.Literal] = stmt.Ident
+func (r *Analyzer) VisitConstraintStmt(stmt v2.ConstraintStmt) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (r *Analyzer) VisitAssertStmt(stmt ast.AssertStmt) {
-	// Check existed assert name
-	if v, ok := r.stack[stmt.Ident.Literal]; ok {
-		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Ident.Literal, v.Line, v.Column))
-	}
-
-	// Check existed alias name
-	if v, ok := r.local[stmt.Alias.Literal]; ok {
-		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Alias.Literal, v.Line, v.Column))
-	}
-
-	// Type inference, if expr
-	stmt.Ident.Typ, stmt.Alias.Typ = ast.Integer, ast.Integer
-	r.stack[stmt.Ident.Literal] = stmt.Ident
-	r.stack[stmt.Alias.Literal] = stmt.Alias
-
-	for _, exp := range stmt.Exps {
-		exp.Accept(r)
-	}
-
-	env := NewAnalyzerWithStack(stmt.NestedAsserts, MergeStacks(r.local, r.stack))
-	env.Check()
+func (r *Analyzer) VisitAssertStmt(stmt v2.AssertStmt) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (r *Analyzer) VisitConstraintStmt(stmt ast.ConstraintStmt) {
-	// Check if constraint is already defined
-	if v, ok := r.stack[stmt.Ident.Literal]; ok {
-		panic(fmt.Sprintf("Name %s already defined at line %v col %v", stmt.Ident.Literal, v.Line, v.Column))
+func (r *Analyzer) VisitAssignStmt(stmt v2.AssignStmt) {
+	if _, ok := r.local[stmt.Id.Literal]; ok {
+		panic("Variable already declared")
 	}
-
-	stmt.Ident.Typ = "constraint"
-	r.stack[stmt.Ident.Literal] = stmt.Ident
-
-	r.VisitBlock(stmt.Block)
+	stmt.Id.LiteralType = stmt.Expr.Accept(r)
+	r.local[stmt.Id.Literal] = stmt.Id
 }
 
-func NewAnalyzerWithStack(stmts []ast.Stmt, stack map[string]ast.Token) Analyzer {
-	return Analyzer{Stmts: stmts, stack: stack, local: make(map[string]ast.Token)}
-}
+func (r *Analyzer) VisitBinaryExpr(expr v2.BinaryExpr) (typ v2.LiteralType) {
+	switch expr.Op.TokenType {
+	case v2.Plus, v2.Minus, v2.Multiply, v2.Divide:
+		left, right := expr.Left.Accept(r), expr.Right.Accept(r)
+		if left == v2.Integer && left == right {
+			typ = v2.Integer
+			return
+		}
 
-func (r *Analyzer) VisitBlock(stmt ast.Block) {
-	env := NewAnalyzerWithStack(stmt, MergeStacks(r.local, r.stack))
-	env.Check()
-}
+		if left == v2.Float && left == right {
+			typ = v2.Float
+			return
+		}
 
-func MergeStacks(local, stack map[string]ast.Token) (st map[string]ast.Token) {
-	st = make(map[string]ast.Token)
+		// type conversion
+		if left == v2.Integer && right == v2.Float {
+			typ = v2.Float
+			return
+		}
 
-	for k, v := range local {
-		st[k] = v
-	}
+		if left == v2.Float && right == v2.Integer {
+			typ = v2.Float
+			return
+		}
 
-	for k, v := range stack {
-		// shadowing variables
-		if _, ok := st[k]; !ok {
-			st[k] = v
+		panic("Type mismatch")
+	case v2.Equal, v2.NotEqual, v2.LessThan, v2.LessThanOrEqual, v2.GreaterThan, v2.GreaterThanOrEqual:
+		left, right := expr.Left.Accept(r), expr.Right.Accept(r)
+		if left == right {
+			typ = v2.Boolean
+			return
+		} else {
+			panic("Type mismatch")
+		}
+	case v2.And, v2.Or:
+		left, right := expr.Left.Accept(r), expr.Right.Accept(r)
+		if left == v2.Boolean && left == right {
+			typ = v2.Boolean
+			return
+		} else {
+			panic("Type mismatch")
 		}
 	}
+	return
+}
 
+func (r *Analyzer) VisitUnaryExpr(expr v2.UnaryExpr) (typ v2.LiteralType) {
+	switch expr.Op.TokenType {
+	case v2.Plus, v2.Minus:
+		typ = expr.Expr.Accept(r)
+		if typ == v2.Integer || typ == v2.Float {
+			return
+		}
+		panic("Type mismatch")
+	case v2.Not:
+		typ = expr.Expr.Accept(r)
+		if typ == v2.Boolean {
+			return
+		}
+		panic("Type mismatch")
+	}
+	return
+}
+
+func (r *Analyzer) VisitToken(token v2.Token) (typ v2.LiteralType) {
+	if token.TokenType == v2.Ident {
+		if v, ok := r.local[token.Literal]; ok {
+			typ = v.LiteralType
+			return
+		}
+		panic("Variable not declared")
+	}
+	typ = token.LiteralType
 	return
 }

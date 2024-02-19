@@ -4,14 +4,16 @@
 abstract constraint Root {
     let threshold = 2 * (30 - 10 / 2);
     assert token (t) => {
-        t > 0;
+        t > threshold;
         t < 100;
     };
     assert usage => {
-        usage it not empty;
+        usage is not empty;
     }
     assert extra_info => {
-        assert name => name is not empty;
+        assert name => { 
+            name is not empty
+        };
     } 
 }
 
@@ -21,7 +23,7 @@ constraint RegisterApi extends Root;
 ```yaml
 RegisterApi:
   Token:
-    - Gt: 0
+    - Gt: 40
     - Lt: 100
   Usage:
     - NotEmpty: true

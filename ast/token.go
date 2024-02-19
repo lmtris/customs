@@ -1,86 +1,96 @@
 package ast
 
-import "fmt"
-
-type Token struct {
-	TokenType
-	Literal string
-	Val     interface{}
-	Typ     Type
-	Line    int
-	Column  int
-}
-
-type Type string
-
-const (
-	Integer Type = "int"
-	Bool    Type = "bool"
-	Float   Type = "float"
-	String  Type = "string"
-	Any     Type = "any"
+import (
+	"fmt"
 )
 
-func NewToken(typ TokenType, lit string, line, column int) Token {
-	return Token{TokenType: typ, Literal: lit, Line: line, Column: column}
+type TokenType int
+
+type LiteralType int
+
+type Token struct {
+	Literal     string
+	LiteralType LiteralType
+	TokenType   TokenType
+	DebugInfo   DebugInfo
+	Precedence  float64
 }
 
-func NewNumber(typ TokenType, lit string, line, column int) Token {
-	return Token{TokenType: typ, Literal: lit, Typ: Integer, Line: line, Column: column}
-}
-
-// Precedence Order Table
-//
-// ()
-// * /
-// + -
-// > >= < <=
-// == !=
-// =
-// (a + b) * c > 2 == False -> ((a + b) * c) > 2) == False
-
-func NewOperator(typ TokenType, lit string, line, column, left, right int) Token {
+func NewToken(tokenType TokenType, literal string, literalType LiteralType, line, column int) Token {
 	return Token{
-		TokenType: typ,
-		Literal:   lit,
-		Line:      line,
-		Column:    column,
+		Literal:     literal,
+		LiteralType: literalType,
+		TokenType:   tokenType,
+		DebugInfo:   DebugInfo{Line: line, Column: column},
 	}
 }
 
 func (r Token) String() string {
-	return fmt.Sprintf("<%s %s %v %s>", r.TokenType, r.Literal, r.Val, r.Typ)
+	return fmt.Sprintf("%s{%s %s %v}", r.TokenType, r.Literal, r.LiteralType, r.DebugInfo)
 }
 
-type TokenType int
+type DebugInfo struct {
+	Line   int
+	Column int
+}
+
+func (r *DebugInfo) String() string {
+	return fmt.Sprintf("%d:%d", r.Line, r.Column)
+}
+
+const (
+	Integer LiteralType = iota
+	Float
+	String
+	Boolean
+	Any // Undefined
+)
+
+func (r LiteralType) String() string {
+	switch r {
+	case Integer:
+		return "Integer"
+	case Float:
+		return "Float"
+	case String:
+		return "String"
+	case Boolean:
+		return "Boolean"
+	case Any:
+		return "Any"
+	}
+	return "Undefined"
+}
 
 const (
 	Let TokenType = iota
-	Arrow
-	Abstract
-	Constraint
 	Assert
+	Constraint
+	Abstract
 	Extends
-	Is
-	Not
-	Plus
-	Minus
-	Mul
-	Div
-	Comma
-	Semicolon
-	LeftBrace
-	RightBrace
-	LeftParen
-	RightParen
-	Assign
-	Gt
-	Lt
-	Gte
-	Lte
 	Equal
 	NotEqual
-	Number
+	GreaterThan
+	GreaterThanOrEqual
+	LessThan
+	LessThanOrEqual
+	Plus
+	Minus
+	Multiply
+	Divide
+	And
+	Or
+	LeftParen
+	RightParen
+	LeftBrace
+	RightBrace
+	As
+	Is
+	Not
+	Assign
+	Arrow
+	Semicolon
+	Value
 	Ident
 	Eof
 )
@@ -88,59 +98,65 @@ const (
 func (r TokenType) String() string {
 	switch r {
 	case Let:
-		return "LET"
-	case Abstract:
-		return "ABSTRACT"
-	case Constraint:
-		return "CONSTRAINT"
+		return "Let"
 	case Assert:
-		return "ASSERT"
+		return "Assert"
+	case Constraint:
+		return "Constraint"
+	case Abstract:
+		return "Abstract"
 	case Extends:
-		return "EXTENDS"
-	case Is:
-		return "IS"
-	case Not:
-		return "NOT"
-	case Plus:
-		return "PLUS"
-	case Minus:
-		return "MINUS"
-	case Mul:
-		return "MUL"
-	case Div:
-		return "SLASH"
-	case Comma:
-		return "COMMA"
-	case Semicolon:
-		return "SEMICOLON"
-	case LeftBrace:
-		return "LEFT_BRACE"
-	case RightBrace:
-		return "RIGHT_BRACE"
-	case LeftParen:
-		return "LEFT_PAREN"
-	case RightParen:
-		return "RIGHT_PAREN"
-	case Assign:
-		return "ASSIGN"
-	case Gt:
-		return "GREATER"
-	case Lt:
-		return "LESS"
-	case Gte:
-		return "GREATER_EQUAL"
-	case Lte:
-		return "LESS_EQUAL"
+		return "Extends"
 	case Equal:
-		return "EQUAL"
+		return "Equal"
 	case NotEqual:
-		return "NOT_EQUAL"
-	case Number:
-		return "NUM"
+		return "NotEqual"
+	case GreaterThan:
+		return "GreaterThan"
+	case GreaterThanOrEqual:
+		return "GreaterThanOrEqual"
+	case LessThan:
+		return "LessThan"
+	case LessThanOrEqual:
+		return "LessThanOrEqual"
+	case Plus:
+		return "Plus"
+	case Minus:
+		return "Minus"
+	case Multiply:
+		return "Multiply"
+	case Divide:
+		return "Divide"
+	case And:
+		return "And"
+	case Or:
+		return "Or"
+	case LeftParen:
+		return "LeftParen"
+	case RightParen:
+		return "RightParen"
+	case LeftBrace:
+		return "LeftBrace"
+	case RightBrace:
+		return "RightBrace"
+	case As:
+		return "As"
+	case Is:
+		return "Is"
+	case Not:
+		return "Not"
+	case Assign:
+		return "Assign"
+	case Arrow:
+		return "Arrow"
+	case Semicolon:
+		return "Semicolon"
+	case Value:
+		return "Value"
 	case Ident:
-		return "ID"
+		return "Ident"
 	case Eof:
-		return "EOF"
+		return "Eof"
 	}
-	return "UNDEFINED"
+	return "Undefined"
 }
